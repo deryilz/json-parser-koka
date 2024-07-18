@@ -84,7 +84,7 @@ pub fun (||)(parser1: parser<a>, parser2: parser<a>): _ parser<a>
       Failure(_) -> parser2(input)
       success -> success
 
-pub fun (++)(parser1: parser<a>, parser2: parser<b>): _ parser<(a, b)>
+pub fun (*)(parser1: parser<a>, parser2: parser<b>): _ parser<(a, b)>
   fn (input)
     match parser1(input)
       Success(parsed1, unparsed1) -> match parser2(unparsed1)
@@ -93,12 +93,15 @@ pub fun (++)(parser1: parser<a>, parser2: parser<b>): _ parser<(a, b)>
       Failure(unparsed) -> Failure(unparsed)
 
 // ignore second result
-pub fun (!++)(parser1: parser<a>, parser2: parser<b>): _ parser<a>
-  (parser1 ++ parser2).map fn((x, _)) x
+pub fun (!*)(parser1: parser<a>, parser2: parser<b>): _ parser<a>
+  (parser1 * parser2).map fn((x, _)) x
 
 // ignore first result
-pub fun (++!)(parser1: parser<a>, parser2: parser<b>): _ parser<b>
-  (parser1 ++ parser2).map fn((_, x)) x
+pub fun (*!)(parser1: parser<a>, parser2: parser<b>): _ parser<b>
+  (parser1 * parser2).map fn((_, x)) x
+
+pub fun (++)(parser1: parser<a>, parser2: parser<a>, ?(++): (a, a) -> a): _ parser<a>
+  (parser1 * parser2).map fn((res1, res2)) res1 ++ res2
 
 // currently sep has to be a parser<unit> and parser<b> doesn't work. not quite sure why
 pub fun repeat(parser: parser<a>, min: int, max: int = 100_000,
@@ -122,4 +125,4 @@ pub fun repeat(parser: parser<a>, min: int, max: int = 100_000,
         else Success([], unparsed) // it's fine, we didn't need any more matches
 
 pub fun with-space(parser: parser<a>): _ parser<a>
-  (p-space().repeat(0) ++! parser) !++ p-space().repeat(0)
+  (p-space().repeat(0) *! parser) !* p-space().repeat(0)

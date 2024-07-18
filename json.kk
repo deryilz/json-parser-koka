@@ -1,10 +1,11 @@
 module json
 
-// currently only integer numbers are supported. float64 support coming soon
+import std/num/float64
+
 pub type jvalue
   Null
   Boolean(value: bool)
-  Number(value: int)
+  Number(value: float64)
   String(value: string)
   Array(values: list<jvalue>)
   Object(entries: list<(string, jvalue)>)
