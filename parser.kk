@@ -59,15 +59,6 @@ pub fun map(parser: parser<a>, f: a -> _ b): _ parser<b>
       Success(parsed, unparsed) -> Success(f(parsed), unparsed)
       Failure(unparsed) -> Failure(unparsed)
 
-pub fun ignore(parser: parser<a>): _ parser<unit>
-  parser.map fn(_) ()
-
-pub fun map-fail(parser: parser<a>, f: string -> _ string): _ parser<a>
-  fn (input)
-    match parser(input)
-      Failure(unparsed) -> Failure(f(unparsed))
-      success -> success
-
 pub fun filter-map(parser: parser<a>, f: a -> _ maybe<b>): _ parser<b>
   fn (input)
     match parser(input)
@@ -76,6 +67,9 @@ pub fun filter-map(parser: parser<a>, f: a -> _ maybe<b>): _ parser<b>
           Just(result) -> Success(result, unparsed)
           Nothing -> Failure(input)
       Failure(unparsed) -> Failure(unparsed)
+
+pub fun ignore(parser: parser<a>): _ parser<unit>
+  parser.map fn(_) ()
 
 // you could make a version of this that returns either<a,b> for parser<a> and parser<b>
 pub fun (||)(parser1: parser<a>, parser2: parser<a>): _ parser<a>
@@ -115,7 +109,6 @@ pub fun repeat(parser: parser<a>, min: int, max: int = 100_000,
             Success((), unparsed2) ->
               val rest-parser = repeat(parser, min - 1, max - 1, sep)
                 .map(fn(result) Cons(parsed, result))
-                .map-fail(fn(_) input)
               rest-parser(unparsed2) // gotta look further, then it'll get cons'd
             Failure(unparsed2) ->
               if min > 0 then Failure(unparsed2)
