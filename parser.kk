@@ -65,7 +65,7 @@ pub fun filter-map(parser: parser<a>, f: a -> _ maybe<b>): _ parser<b>
       Success(parsed, unparsed) ->
         match f(parsed)
           Just(result) -> Success(result, unparsed)
-          Nothing -> Failure(input)
+          Nothing -> Failure(unparsed)
       Failure(unparsed) -> Failure(unparsed)
 
 pub fun ignore(parser: parser<a>): _ parser<unit>
@@ -96,6 +96,9 @@ pub fun (*!)(parser1: parser<a>, parser2: parser<b>): _ parser<b>
 
 pub fun (++)(parser1: parser<a>, parser2: parser<a>, ?(++): (a, a) -> a): _ parser<a>
   (parser1 * parser2).map fn((res1, res2)) res1 ++ res2
+
+pub fun or-blank(parser: parser<string>): _ parser<string>
+  parser.maybe.map(fn(opt) opt.default(""))
 
 // currently sep has to be a parser<unit> and parser<b> doesn't work. not quite sure why
 pub fun repeat(parser: parser<a>, min: int, max: int = 100_000,

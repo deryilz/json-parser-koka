@@ -17,15 +17,13 @@ pub fun p-null(): _ parser<jvalue>
   p-literal("null").map fn(_) Null
 
 pub fun p-number(): _ parser<jvalue>
-  fun or-blank(parser: parser<string>): _ parser<string>
-    parser.maybe.map(fn(it) it.default(""))
-
-  val negative = p-literal("-").or-blank
+  val neg = p-literal("-")
+  val pos = p-literal("+")
   val digits = p-char-if(is-digit).repeat(1).map(string)
-  (negative
+  (neg.or-blank
     ++ digits
     ++ (p-literal(".") ++ digits).or-blank
-    ++ ((p-literal("e") || p-literal("E")) ++ negative ++ digits).or-blank)
+    ++ ((p-literal("e") || p-literal("E")) ++ (neg || pos).or-blank ++ digits).or-blank)
     .filter-map(parse-float64)
     .map(Number)
 
