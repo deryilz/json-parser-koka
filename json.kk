@@ -13,7 +13,7 @@ pub type jvalue
 pub fun show(this: jvalue): div string
   match this
     Null -> "null"
-    Boolean(value) -> value.show
+    Boolean(value) -> value.show.to-lower
     Number(value) -> value.show
     String(value) -> value.show
     Array(values) -> "[" ++ values.map(show).join(", ") ++ "]"
@@ -27,7 +27,7 @@ pub fun debug(this: jvalue): div string
     Null -> "Null"
     Boolean(value) -> "Boolean(" ++ value.show ++ ")"
     Number(value) -> "Number(" ++ value.show ++ ")"
-    String(value) -> "String(" ++ value ++ ")"
+    String(value) -> "String(" ++ value.show ++ ")"
     Array(values) -> "Array([" ++ values.map(debug).join(", ") ++ "])"
     Object(entries) ->
       val mapped-entries = entries.map fn((key, value))
