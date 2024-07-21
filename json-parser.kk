@@ -5,8 +5,14 @@ pub import parser
 
 import std/num/float64
 
+// for now, only inline comments are supported due to weaknesses with the library
+fun with-comments(parser: parser<a>): _ parser<a>
+  val comment = p-literal("//") * p-char-if(fn(char) char != '\n').repeat(0) * p-literal("\n")
+  val comments = comment.with-space.repeat(0).with-space
+  (comments *! parser) !* comments
+
 pub fun p-json(): _ parser<jvalue>
-  p-value().with-space !* p-end()
+  p-value().with-comments !* p-end()
 
 pub fun p-value(): _ parser<jvalue>
   p-lazy
@@ -40,12 +46,12 @@ pub fun p-boolean(): _ parser<jvalue>
   (p-literal("false").map(fn(_) Boolean(False)))
 
 pub fun p-array(): _ parser<jvalue>
-  val value-list = p-value().with-space.repeat(0, sep = p-literal(",").ignore)
+  val value-list = p-value().with-comments.repeat(0, sep = p-literal(",").ignore)
   ((p-literal("[") *! value-list) !* p-literal("]"))
     .map(Array)
 
 pub fun p-object(): _ parser<jvalue>
-  val entry = (p-quoted() !* p-literal(":").with-space) * p-value()
-  val entry-list = entry.with-space.repeat(0, sep = p-literal(",").ignore)
-  ((p-literal("{") *! entry-list.with-space) !* p-literal("}"))
+  val entry = (p-quoted() !* p-literal(":").with-comments) * p-value()
+  val entry-list = entry.with-comments.repeat(0, sep = p-literal(",").ignore)
+  ((p-literal("{") *! entry-list.with-comments) !* p-literal("}"))
     .map(Object)
